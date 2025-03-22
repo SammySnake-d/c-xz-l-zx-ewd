@@ -454,6 +454,32 @@ const updateParams = res => {
         if ( Firstlogin ) {
             Firstlogin = false, timestamp = Date.now(), totaltime = Config.CookieArray.length;
             console.log( `[2m${Main}[0m\n[33mhttp://${Config.Ip}:${Config.Port}/v1[0m\n\n${Object.keys( Config.Settings ).map( ( setting => UnknownSettings?.includes( setting ) ? `??? [31m${setting}: ${Config.Settings[setting]}[0m` : `[1m${setting}:[0m ${ChangedSettings?.includes( setting ) ? '[33m' : '[36m'}${Config.Settings[setting]}[0m` ) ).sort().join( '\n' )}\n` ); //↓
+                
+            
+            // 在显示配置的地方添加调试信息
+            console.log( 'Environment variables debug:\n' );
+            console.log( 'PROMPT_STYLE_ENABLED:', process.env.PROMPT_STYLE_ENABLED );
+                if ( process.env.PROMPT_STYLE_ENABLED === 'true' ) {
+                    console.log( '\n=== Prompt Style Configuration ===\n' );
+                    console.log( `PROMPT_NAME: ${process.env.PROMPT_NAME || prompt_styles[0].name}\n` );
+                    console.log( `PROMPT_TEXT: ${process.env.PROMPT_TEXT || prompt_styles[0].prompt}\n` );
+                    console.log( `PROMPT_SUMMARY: ${process.env.PROMPT_SUMMARY || prompt_styles[0].summary}\n` );
+                    console.log( `PROMPT_SYSTEMATIC: ${process.env.PROMPT_SYSTEMATIC || prompt_styles[0].attributes[0].percentage}` );
+                    console.log( `PROMPT_ANALYTICAL: ${process.env.PROMPT_ANALYTICAL || prompt_styles[0].attributes[1].percentage}` );
+                    console.log( `PROMPT_METHODICAL: ${process.env.PROMPT_METHODICAL || prompt_styles[0].attributes[2].percentage}` );
+    
+                    console.log( Object.entries( prompt_styles )
+                        .map( ( [key, value] ) => `${key}: [36m${value}[0m` )
+                        .join( '\n' ) );
+                }
+    
+                console.log( '\n' ); // 添加空行
+    
+                //user agent的配置显示
+                console.log( "Usesr Agent:", AI.agent() );
+    
+                console.log( '\n' );
+                
             if ( Config.Settings.Superfetch ) {
                 SuperfetchAvailable( true );
                 SuperfetchFoldersMk();
@@ -1136,31 +1162,33 @@ const updateParams = res => {
                 ...userConfig
             };
 
-            // 在显示配置的地方添加调试信息
-            console.log( 'Environment variables debug:' );
-            console.log( 'PROMPT_STYLE_ENABLED:', process.env.PROMPT_STYLE_ENABLED );
+            // // 在显示配置的地方添加调试信息
+            // console.log( 'Environment variables debug:' );
+            // console.log( 'PROMPT_STYLE_ENABLED:', process.env.PROMPT_STYLE_ENABLED );
 
             // 显示Prompt Style配置
-            if ( process.env.PROMPT_STYLE_ENABLED === 'true' ) {
-                console.log( '\n=== Prompt Style Configuration ===' );
-                console.log( `PROMPT_NAME: ${process.env.PROMPT_NAME || prompt_styles[0].name}` );
-                console.log( `PROMPT_TEXT: ${process.env.PROMPT_TEXT || prompt_styles[0].prompt}` );
-                console.log( `PROMPT_SUMMARY: ${process.env.PROMPT_SUMMARY || prompt_styles[0].summary}` );
-                console.log( `PROMPT_SYSTEMATIC: ${process.env.PROMPT_SYSTEMATIC || prompt_styles[0].attributes[0].percentage}` );
-                console.log( `PROMPT_ANALYTICAL: ${process.env.PROMPT_ANALYTICAL || prompt_styles[0].attributes[1].percentage}` );
-                console.log( `PROMPT_METHODICAL: ${process.env.PROMPT_METHODICAL || prompt_styles[0].attributes[2].percentage}` );
+            // if ( process.env.PROMPT_STYLE_ENABLED === 'true' ) {
+            //     console.log( '\n=== Prompt Style Configuration ===' );
+            //     console.log( `PROMPT_NAME: ${process.env.PROMPT_NAME || prompt_styles[0].name}` );
+            //     console.log( `PROMPT_TEXT: ${process.env.PROMPT_TEXT || prompt_styles[0].prompt}` );
+            //     console.log( `PROMPT_SUMMARY: ${process.env.PROMPT_SUMMARY || prompt_styles[0].summary}` );
+            //     console.log( `PROMPT_SYSTEMATIC: ${process.env.PROMPT_SYSTEMATIC || prompt_styles[0].attributes[0].percentage}` );
+            //     console.log( `PROMPT_ANALYTICAL: ${process.env.PROMPT_ANALYTICAL || prompt_styles[0].attributes[1].percentage}` );
+            //     console.log( `PROMPT_METHODICAL: ${process.env.PROMPT_METHODICAL || prompt_styles[0].attributes[2].percentage}` );
 
-            }
+            //     console.log( Object.entries( prompt_styles )
+            //         .map( ( [key, value] ) => `${key}: [36m${value}[0m` )
+            //         .join( '\n' ) );
+            // }
 
-            console.log( '\n' ); // 添加空行
-            console.log
+            // console.log( '\n' ); // 添加空行
 
-            //user agent的配置显示
-            console.log( "Usesr Agent:", AI.agent() );
-            
-            console.log('\n');
-            
-           
+            // //user agent的配置显示
+            // console.log( "Usesr Agent:", AI.agent() );
+
+            // console.log( '\n' );
+
+
         } else {
             Config.Cookie = 'SET YOUR COOKIE HERE';
             writeSettings( Config, true );
