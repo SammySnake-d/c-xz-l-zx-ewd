@@ -4,9 +4,52 @@
 */
 'use strict';
 
+require( 'dotenv' ).config();
+
+const { log } = require( 'node:console' );
 const { createServer: Server, IncomingMessage, ServerResponse } = require( 'node:http' ), { createHash: Hash, randomUUID, randomInt, randomBytes } = require( 'node:crypto' ), { TransformStream, ReadableStream } = require( 'node:stream/web' ), { Readable, Writable } = require( 'node:stream' ), { Blob } = require( 'node:buffer' ), { existsSync: exists, writeFileSync: write, createWriteStream } = require( 'node:fs' ), { join: joinP } = require( 'node:path' ), { ClewdSuperfetch: Superfetch, SuperfetchAvailable, SuperfetchFoldersMk, SuperfetchFoldersRm } = require( './lib/clewd-superfetch' ), { AI, fileName, genericFixes, bytesToSize, setTitle, checkResErr, Replacements, Main } = require( './lib/clewd-utils' ), ClewdStream = require( './lib/clewd-stream' );
 
 /******************************************************* */
+
+
+// const uuid = randomUUID();
+const uuid = '0b12cfee-b3f5-4b9d-85de-ab6961c58a28';
+
+const defaultPrompt = 'You are an AI assistant focused on providing comprehensive, well-reasoned responses. You must think step-by-step before providing any answers. Break down complex problems systematically by:\n    1. Identifying the core question or problem\n    2. Analyzing key components thoroughly\n    3. Developing a structured, logical approach\n    4. Anticipating potential challenges\n    5. Constructing a clear, methodical response\n\n    Always use <thinking> tags to demonstrate your reasoning process, showing:\n    - Detailed step-by-step analysis\n    - Critical evaluation of different perspectives\n    - Transparent decision-making logic\n\n    Then provide a comprehensive <answer> that reflects your systematic thinking, ensuring depth, clarity, and nuanced understanding.';
+
+const defaultSummary = 'Deliver comprehensive responses through systematic, analytical, and methodical reasoning';
+
+// 从环境变量获取prompt style配置
+const prompt_styles = process.env.PROMPT_STYLE_ENABLED === 'true' ? [
+    {
+        type: "custom",
+        uuid: uuid,
+        attributes: [
+            {
+                name: "Systematic",
+                percentage: parseFloat( process.env.PROMPT_SYSTEMATIC || "0.9" )
+            },
+            {
+                name: "Analytical",
+                percentage: parseFloat( process.env.PROMPT_ANALYTICAL || "0.8" )
+            },
+            {
+                name: "Methodical",
+                percentage: parseFloat( process.env.PROMPT_METHODICAL || "0.9" )
+            }
+        ],
+        name: process.env.PROMPT_NAME || "Recover",
+        prompt: process.env.PROMPT_TEXT || defaultPrompt,
+        summary: process.env.PROMPT_SUMMARY || defaultSummary,
+        isDefault: false,
+        key: uuid
+    }
+] : undefined;
+
+/*---------------------------------------------------- */
+
+
+
 let currentIndex, Firstlogin = true, changeflag = 0, changing, changetime = 0, totaltime, uuidOrgArray = [], model, cookieModel, tokens, apiKey, timestamp, regexLog, isPro, modelList = [];
 
 const url = require( 'url' );
@@ -1093,16 +1136,31 @@ const updateParams = res => {
                 ...userConfig
             };
 
-            // 添加配置显示
-            console.log( `[2m${Main}[0m\n[33mhttp://${Config.Ip}:${Config.Port}/v1[0m\n` );
+            // 在显示配置的地方添加调试信息
+            console.log( 'Environment variables debug:' );
+            console.log( 'PROMPT_STYLE_ENABLED:', process.env.PROMPT_STYLE_ENABLED );
 
-            // 显示所有Settings的配置
-            console.log( Object.entries( Config.Settings )
-                .sort( ( [a], [b] ) => a.localeCompare( b ) )
-                .map( ( [key, value] ) => `${key}: ${value}` )
-                .join( '\n' ) );
+            // 显示Prompt Style配置
+            if ( process.env.PROMPT_STYLE_ENABLED === 'true' ) {
+                console.log( '\n=== Prompt Style Configuration ===' );
+                console.log( `PROMPT_NAME: ${process.env.PROMPT_NAME || prompt_styles[0].name}` );
+                console.log( `PROMPT_TEXT: ${process.env.PROMPT_TEXT || prompt_styles[0].prompt}` );
+                console.log( `PROMPT_SUMMARY: ${process.env.PROMPT_SUMMARY || prompt_styles[0].summary}` );
+                console.log( `PROMPT_SYSTEMATIC: ${process.env.PROMPT_SYSTEMATIC || prompt_styles[0].attributes[0].percentage}` );
+                console.log( `PROMPT_ANALYTICAL: ${process.env.PROMPT_ANALYTICAL || prompt_styles[0].attributes[1].percentage}` );
+                console.log( `PROMPT_METHODICAL: ${process.env.PROMPT_METHODICAL || prompt_styles[0].attributes[2].percentage}` );
+
+            }
 
             console.log( '\n' ); // 添加空行
+            console.log
+
+            //user agent的配置显示
+            console.log( "Usesr Agent:", AI.agent() );
+            
+            console.log('\n');
+            
+           
         } else {
             Config.Cookie = 'SET YOUR COOKIE HERE';
             writeSettings( Config, true );
@@ -1149,36 +1207,3 @@ process.on( 'SIGINT', cleanup );
 process.on( 'exit', ( async () => {
     console.log( 'exiting...' );
 } ) );
-
-// const uuid = randomUUID();
-const uuid = '0b12cfee-b3f5-4b9d-85de-ab6961c58a28';
-
-const defaultPrompt = 'You are an AI assistant focused on providing comprehensive, well-reasoned responses. You must think step-by-step before providing any answers. Break down complex problems systematically by:\n    1. Identifying the core question or problem\n    2. Analyzing key components thoroughly\n    3. Developing a structured, logical approach\n    4. Anticipating potential challenges\n    5. Constructing a clear, methodical response\n\n    Always use <thinking> tags to demonstrate your reasoning process, showing:\n    - Detailed step-by-step analysis\n    - Critical evaluation of different perspectives\n    - Transparent decision-making logic\n\n    Then provide a comprehensive <answer> that reflects your systematic thinking, ensuring depth, clarity, and nuanced understanding.';;
-const defaultSummary = 'Deliver comprehensive responses through systematic, analytical, and methodical reasoning';
-
-// 从环境变量获取prompt style配置
-const prompt_styles = process.env.PROMPT_STYLE_ENABLED === 'true' ? [
-    {
-        type: "custom",
-        uuid: uuid,
-        attributes: [
-            {
-                name: "Systematic",
-                percentage: parseFloat( process.env.PROMPT_SYSTEMATIC || "0.9" )
-            },
-            {
-                name: "Analytical",
-                percentage: parseFloat( process.env.PROMPT_ANALYTICAL || "0.8" )
-            },
-            {
-                name: "Methodical",
-                percentage: parseFloat( process.env.PROMPT_METHODICAL || "0.9" )
-            }
-        ],
-        name: process.env.PROMPT_NAME || "Recover",
-        prompt: process.env.PROMPT_TEXT || defaultPrompt,
-        summary: process.env.PROMPT_SUMMARY || defaultSummary,
-        isDefault: false,
-        key: uuid
-    }
-] : undefined;
