@@ -963,6 +963,7 @@ const updateParams = res => {
                                         temperature
                                     },
                                     personalized_styles: prompt_styles,
+                                    sync_sources:[],
                                     prompt: prompt || '',
                                     timezone: AI.zone()
                                 };
@@ -1141,6 +1142,9 @@ process.on( 'exit', ( async () => {
 const uuid = randomUUID();
 // const uuid = '0b12cfee-b3f5-4b9d-85de-ab6961c58a28';
 
+const defaultPrompt = 'You are an AI assistant focused on providing comprehensive, well-reasoned responses. You must think step-by-step before providing any answers. Break down complex problems systematically by:\n    1. Identifying the core question or problem\n    2. Analyzing key components thoroughly\n    3. Developing a structured, logical approach\n    4. Anticipating potential challenges\n    5. Constructing a clear, methodical response\n\n    Always use <thinking> tags to demonstrate your reasoning process, showing:\n    - Detailed step-by-step analysis\n    - Critical evaluation of different perspectives\n    - Transparent decision-making logic\n\n    Then provide a comprehensive <answer> that reflects your systematic thinking, ensuring depth, clarity, and nuanced understanding.';;
+const defaultSummary = 'Deliver comprehensive responses through systematic, analytical, and methodical reasoning';
+
 // 从环境变量获取prompt style配置
 const prompt_styles = process.env.PROMPT_STYLE_ENABLED === 'true' ? [
     {
@@ -1161,8 +1165,8 @@ const prompt_styles = process.env.PROMPT_STYLE_ENABLED === 'true' ? [
             }
         ],
         name: process.env.PROMPT_NAME || "Recover",
-        prompt: process.env.PROMPT_TEXT || 'You are an AI assistant focused on providing comprehensive...',
-        summary: process.env.PROMPT_SUMMARY || 'Deliver comprehensive responses through systematic, analytical, and methodical reasoning',
+        prompt: process.env.PROMPT_TEXT || defaultPrompt,
+        summary: process.env.PROMPT_SUMMARY || defaultSummary,
         isDefault: false,
         key: uuid
     }
